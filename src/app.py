@@ -10,19 +10,12 @@ st.set_page_config(page_title="Previsão de Churn", page_icon="📊", layout="wi
 @st.cache_resource
 def load_models():
     models_dir = os.path.join(os.path.dirname(__file__), 'models')
-    modelo_arvore_decisao = joblib.load(os.path.join(models_dir, 'decision_tree_model.pkl'))
     modelo_knn = joblib.load(os.path.join(models_dir, 'knn_model.pkl'))
     padronizador_dados = joblib.load(os.path.join(models_dir, 'scaler.pkl'))
     colunas_modelo = joblib.load(os.path.join(models_dir, 'model_columns.pkl'))
-    return modelo_arvore_decisao, modelo_knn, padronizador_dados, colunas_modelo
+    return modelo_knn, padronizador_dados, colunas_modelo
 
-modelo_arvore_decisao, modelo_knn, padronizador_dados, colunas_modelo = load_models()
-
-# Sidebar para opções
-st.sidebar.title("Configurações")
-modelo_escolhido = st.sidebar.radio("Escolha o Modelo de Predição", ("Árvore de Decisão", "KNN"))
-
-st.sidebar.markdown("---")
+modelo_knn, padronizador_dados, colunas_modelo = load_models()
 
 st.title("Sistema Inteligente de Classificação - Churn de Clientes")
 st.markdown("Insira os dados do cliente abaixo para prever a probabilidade de cancelamento do serviço.")
@@ -105,16 +98,12 @@ if st.button("Prever", use_container_width=True, type="primary"):
     dados_entrada = dados_entrada[colunas_modelo]
     
     # Inferência
-    if modelo_escolhido == "Árvore de Decisão":
-        previsao = modelo_arvore_decisao.predict(dados_entrada)[0]
-    else:
-        # KNN precisa do scaler
-        dados_entrada_padronizados = padronizador_dados.transform(dados_entrada)
-        previsao = modelo_knn.predict(dados_entrada_padronizados)[0]
+    dados_entrada_padronizados = padronizador_dados.transform(dados_entrada)
+    previsao = modelo_knn.predict(dados_entrada_padronizados)[0]
         
     st.markdown("---")
     if previsao == 1:
-        st.error(f"🚨 **Alerta!** De acordo com o modelo **{modelo_escolhido}**, este cliente possui alto risco de **CHURN** (Cancelar o serviço).")
+        st.error("🚨 **Alerta!** De acordo com o modelo KNN, este cliente possui alto risco de **CHURN** (Cancelar o serviço).")
     else:
-        st.success(f"✅ **Tudo Certo!** De acordo com o modelo **{modelo_escolhido}**, este cliente **NÃO** deve cancelar o serviço no momento.")
+        st.success("✅ **Tudo Certo!** De acordo com o modelo KNN, este cliente **NÃO** deve cancelar o serviço no momento.")
         st.balloons()
