@@ -14,7 +14,16 @@ Depois de pesquisar e refletir sobre o problema, fixei o f1-score como sendo a m
 
 Após os 100 testes (repetições), obtive os seguintes resultados:
 ![Médias KNN](src/imgs/medias_knn.png)
+
+K=7 e heurística de Manhattan foi a melhor configuração para o KNN.
+
 ![Médias Árvore de Decisão](src/imgs/medias_arvore.png)
+
+Profundidade=5 foi a melhor configuração para a Árvore de Decisão.
+
+![Análise Overfitting](src/imgs/analise_overfitting.png)
+
+Análise de Overfitting: Mostra o desempenho dos modelos nos conjuntos de treino e teste. O KNN tende a reduzir o overfitting a medida que o K aumenta. Já a Árvore de Decisão, a medida que a profundidade aumenta o overfitting também aumenta. Podemos concluir que a Árvore de Decisão é mais propensa a overfitting do que o KNN.
 
 Com base nos gráficos acima, podemos concluir que o melhor algoritmo em média, para prever a evasão de clientes é o KNN com K=7 e heurística de Manhattan, com f1-score de 0.547.
 
