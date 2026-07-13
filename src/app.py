@@ -10,13 +10,13 @@ st.set_page_config(page_title="Previsão de Churn", page_icon="📊", layout="wi
 @st.cache_resource
 def load_models():
     models_dir = os.path.join(os.path.dirname(__file__), 'models')
-    dt_model = joblib.load(os.path.join(models_dir, 'decision_tree_model.pkl'))
-    knn_model = joblib.load(os.path.join(models_dir, 'knn_model.pkl'))
-    scaler = joblib.load(os.path.join(models_dir, 'scaler.pkl'))
-    model_columns = joblib.load(os.path.join(models_dir, 'model_columns.pkl'))
-    return dt_model, knn_model, scaler, model_columns
+    modelo_arvore_decisao = joblib.load(os.path.join(models_dir, 'decision_tree_model.pkl'))
+    modelo_knn = joblib.load(os.path.join(models_dir, 'knn_model.pkl'))
+    padronizador_dados = joblib.load(os.path.join(models_dir, 'scaler.pkl'))
+    colunas_modelo = joblib.load(os.path.join(models_dir, 'model_columns.pkl'))
+    return modelo_arvore_decisao, modelo_knn, padronizador_dados, colunas_modelo
 
-dt_model, knn_model, scaler, model_columns = load_models()
+modelo_arvore_decisao, modelo_knn, padronizador_dados, colunas_modelo = load_models()
 
 # Sidebar para opções
 st.sidebar.title("Configurações")
@@ -63,7 +63,7 @@ with col3:
 # Processamento e Predição
 if st.button("Prever", use_container_width=True, type="primary"):
     # Montar o dataframe de input
-    input_data = pd.DataFrame([{
+    dados_entrada = pd.DataFrame([{
         'gender': gender,
         'SeniorCitizen': 1 if senior_citizen == "Sim" else 0,
         'Partner': partner,
@@ -90,30 +90,30 @@ if st.button("Prever", use_container_width=True, type="primary"):
     colunas_binarias = ['gender', 'Partner', 'Dependents', 'PhoneService', 'PaperlessBilling']
     
     for coluna in colunas_binarias:
-        input_data[coluna] = input_data[coluna].map(mapeamento_binario)
+        dados_entrada[coluna] = dados_entrada[coluna].map(mapeamento_binario)
         
     # One-Hot Encoding
-    colunas_categoricas = input_data.select_dtypes(include=['object', 'str']).columns.tolist()
-    input_data = pd.get_dummies(input_data, columns=colunas_categoricas, drop_first=True)
+    colunas_categoricas = dados_entrada.select_dtypes(include=['object', 'str']).columns.tolist()
+    dados_entrada = pd.get_dummies(dados_entrada, columns=colunas_categoricas, drop_first=True)
     
     # Garantir que todas as colunas do modelo estejam presentes
-    for col in model_columns:
-        if col not in input_data.columns:
-            input_data[col] = 0
+    for col in colunas_modelo:
+        if col not in dados_entrada.columns:
+            dados_entrada[col] = 0
             
     # Reordenar colunas exatamente como no treino (vital para o modelo)
-    input_data = input_data[model_columns]
+    dados_entrada = dados_entrada[colunas_modelo]
     
     # Inferência
     if modelo_escolhido == "Árvore de Decisão":
-        prediction = dt_model.predict(input_data)[0]
+        previsao = modelo_arvore_decisao.predict(dados_entrada)[0]
     else:
         # KNN precisa do scaler
-        input_data_scaled = scaler.transform(input_data)
-        prediction = knn_model.predict(input_data_scaled)[0]
+        dados_entrada_padronizados = padronizador_dados.transform(dados_entrada)
+        previsao = modelo_knn.predict(dados_entrada_padronizados)[0]
         
     st.markdown("---")
-    if prediction == 1:
+    if previsao == 1:
         st.error(f"🚨 **Alerta!** De acordo com o modelo **{modelo_escolhido}**, este cliente possui alto risco de **CHURN** (Cancelar o serviço).")
     else:
         st.success(f"✅ **Tudo Certo!** De acordo com o modelo **{modelo_escolhido}**, este cliente **NÃO** deve cancelar o serviço no momento.")
