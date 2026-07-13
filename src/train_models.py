@@ -22,21 +22,21 @@ def train_and_export_models():
     colunas_esperadas = list(atributos_clientes.columns)
     
     print("Dividindo o dataset em treino e teste...")
-    atributos_treinamento, atributos_teste, rotulos_treinamento, rotulos_teste = train_test_split(atributos_clientes, rotulos_churn, test_size=0.2, random_state=42)
+    atributos_treinamento, atributos_teste, rotulos_treinamento, rotulos_teste = train_test_split(atributos_clientes, rotulos_churn, test_size=0.2, random_state=14)
     
     print("Padronizando os dados (necessário para o KNN)...")
     padronizador_dados = StandardScaler()
     atributos_treinamento_padronizados = padronizador_dados.fit_transform(atributos_treinamento)
     
     # Treinando a Árvore de Decisão
-    print("Treinando Árvore de Decisão (max_depth=5)...")
-    modelo_arvore_decisao = DecisionTreeClassifier(max_depth=5, random_state=42)
+    print("Treinando Árvore de Decisão (max_depth=3)...")
+    modelo_arvore_decisao = DecisionTreeClassifier(max_depth=3, random_state=14)
     # A Árvore de Decisão não precisa de dados padronizados
     modelo_arvore_decisao.fit(atributos_treinamento, rotulos_treinamento)
     
     # Treinando o KNN
-    print("Treinando KNN (n_neighbors=7, metric='euclidean')...")
-    modelo_knn = KNeighborsClassifier(n_neighbors=7, metric='euclidean')
+    print("Treinando KNN (n_neighbors=7, metric='manhattan')...")
+    modelo_knn = KNeighborsClassifier(n_neighbors=7, metric='manhattan')
     # O KNN PRECISA dos dados padronizados
     modelo_knn.fit(atributos_treinamento_padronizados, rotulos_treinamento)
     
